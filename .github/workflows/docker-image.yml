@@ -21,4 +21,17 @@ jobs:
             -t tecmilenio-fase2:latest \
             -f FASE_II_Proyecto_IA_Tecmilenio/Dockerfile \
             FASE_II_Proyecto_IA_Tecmilenio
-          
+- name: Ejecutar contenedor y comprobar API
+        run: |
+          docker run -d --name prueba-tecmilenio -p 8080:8080 tecmilenio-fase2:latest
+          sleep 10
+          docker ps
+          curl --fail http://localhost:8080/health
+          curl --fail http://localhost:8080/
+          curl --fail -X POST http://localhost:8080/api/chat \
+            -H "Content-Type: application/json" \
+            -d '{"question":"horario"}'
+
+      - name: Mostrar registros del contenedor
+        if: always()
+        run: docker logs prueba-tecmilenio
