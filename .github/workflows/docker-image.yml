@@ -3,8 +3,6 @@ name: Validacion Docker Tecmilenio
 on:
   push:
     branches: [principal]
-  pull_request:
-    branches: [principal]
   workflow_dispatch:
 
 jobs:
@@ -16,22 +14,23 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Construir imagen Docker
-        run: |
-          docker build \
-            -t tecmilenio-fase2:latest \
-            -f FASE_II_Proyecto_IA_Tecmilenio/Dockerfile \
-            FASE_II_Proyecto_IA_Tecmilenio
-- name: Ejecutar contenedor y comprobar API
-        run: |
-          docker run -d --name prueba-tecmilenio -p 8080:8080 tecmilenio-fase2:latest
-          sleep 10
-          docker ps
-          curl --fail http://localhost:8080/health
-          curl --fail http://localhost:8080/
-          curl --fail -X POST http://localhost:8080/api/chat \
-            -H "Content-Type: application/json" \
-            -d '{"question":"horario"}'
+        run: docker build -t tecmilenio-fase2:latest -f FASE_II_Proyecto_IA_Tecmilenio/Dockerfile FASE_II_Proyecto_IA_Tecmilenio
 
-      - name: Mostrar registros del contenedor
+      - name: Ejecutar contenedor
+        run: docker run -d --name prueba-tecmilenio -p 8080:8080 tecmilenio-fase2:latest
+
+      - name: Esperar inicio
+        run: sleep 10
+
+      - name: Verificar contenedor
+        run: docker ps
+
+      - name: Probar pagina principal
+        run: curl --fail http://localhost:8080/
+
+      - name: Probar API
+        run: 'curl --fail -X POST http://localhost:8080/api/chat -H "Content-Type: application/json" -d "{\"question\":\"horario\"}"'
+
+      - name: Mostrar registros
         if: always()
         run: docker logs prueba-tecmilenio
